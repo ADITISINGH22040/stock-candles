@@ -1,19 +1,28 @@
 package com.stockcandles.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-import java.time.LocalDate;
-
 public class StockCandleQueryRequest {
 
-    @NotBlank(message = "Symbol is required")
     private String symbol;
-
-    @NotNull(message = "Trading date is required")
-    private LocalDate tradingDate;
+    private String timeframe;
+    private String startDate;
+    private String endDate;
+    private Integer page;
+    private Integer size;
 
     public StockCandleQueryRequest() {
+    }
+
+    public StockCandleQueryRequest(String symbol, String timeframe, String startDate, String endDate) {
+        this(symbol, timeframe, startDate, endDate, 0, 200);
+    }
+
+    public StockCandleQueryRequest(String symbol, String timeframe, String startDate, String endDate, Integer page, Integer size) {
+        this.symbol = symbol;
+        this.timeframe = timeframe;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.page = page;
+        this.size = size;
     }
 
     public String getSymbol() {
@@ -24,11 +33,43 @@ public class StockCandleQueryRequest {
         this.symbol = symbol;
     }
 
-    public LocalDate getTradingDate() {
-        return tradingDate;
+    public String getTimeframe() {
+        return timeframe;
     }
 
-    public void setTradingDate(LocalDate tradingDate) {
-        this.tradingDate = tradingDate;
+    public void setTimeframe(String timeframe) {
+        this.timeframe = timeframe;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

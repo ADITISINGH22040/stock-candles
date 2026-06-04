@@ -8,6 +8,8 @@ Submission layout for the stock market data aggregation assignment.
 submission/
 ├── server/          # Spring Boot REST API (Java 17, Maven)
 ├── client/          # Backend CLI client (Java 17, Maven)
+├── ingestion/       # One-time CSV → Cassandra utility (Part 1.3)
+├── data/            # Place stock_data.csv here (not in git)
 ├── web-client/      # Optional Vue.js frontend
 ├── schema.cql       # Apache Cassandra keyspace and table definitions
 └── README.md
@@ -84,6 +86,35 @@ SELECT * FROM stock_keyspace.stock_candles LIMIT 5;
 
 ---
 
+## Data ingestion (Part 1.3)
+
+`stock_data.csv` is **not** committed to git (see root `.gitignore`). Place it locally at:
+
+`submission/data/stock_data.csv`
+
+Columns: `symbol`, `datetime`, `open`, `high`, `low`, `close`, `volume` (1-minute candles).
+
+**Assumption:** `datetime` is parsed in `Asia/Kolkata` and stored as `trading_date` + `candle_time` in Cassandra.
+
+### Run ingestion (from repo root)
+
+Prerequisites: Cassandra running, `schema.cql` applied, CSV in place.
+
+```bash
+cd /Users/shikharsingh/stock-candles
+mvn -f submission/pom.xml -pl ingestion package exec:java \
+  -Dexec.args="--file submission/data/stock_data.csv"
+```
+
+Verify sample rows:
+
+```bash
+docker exec cassandra-stock cqlsh -e \
+  "SELECT symbol, trading_date, candle_time, open, close, volume FROM stock_keyspace.stock_candles LIMIT 5;"
+```
+
+---
+
 ## Spring Boot server
 
 Configured in `server/src/main/resources/application.yml`:
@@ -129,7 +160,13 @@ CLI that calls the REST API.
 ```bash
 cd client
 mvn package
-java -jar target/stock-candles-client-1.0.0-SNAPSHOT.jar AAPL 2024-01-15
+java -jar target/stock-candles-client-1.0.0-SNAPSHOT.jar AAPL 15m "2024-01-15 09:15:00" "2024-01-15 15:30:00"
+```
+
+Optional pagination is supported by adding page and size arguments:
+
+```bash
+java -jar target/stock-candles-client-1.0.0-SNAPSHOT.jar AAPL 15m "2024-01-15 09:15:00" "2024-01-15 15:30:00" 0 100
 ```
 
 Environment variable `STOCK_API_BASE_URL` defaults to `http://localhost:8080`.
@@ -143,6 +180,8 @@ cd web-client
 npm install
 npm run dev
 ```
+
+The Vue app supports symbol/timeframe/date-range queries and renders a candlestick chart.
 
 ---
 
